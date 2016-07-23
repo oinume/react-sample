@@ -22,7 +22,7 @@ const config = {
     devtool: 'eval',
     hot: true,        // Live-reload
     inline: true,
-    port: 7000,
+    port: 7001,
     host: '0.0.0.0',  //Change to '0.0.0.0' for external facing server
   },
   devtool: 'eval',
