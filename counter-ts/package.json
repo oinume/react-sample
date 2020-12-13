@@ -1,5 +1,5 @@
 {
-  "name": "05_counter-ts",
+  "name": "counter-ts",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
