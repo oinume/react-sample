@@ -1,10 +1,15 @@
+import { expect, it } from '@jest/globals';
 import * as React from 'react';
-import renderer from 'react-test-renderer';
+import renderer, { act, type ReactTestRenderer } from 'react-test-renderer';
 
 import { ThemedText } from '../ThemedText';
 
-it(`renders correctly`, () => {
-  const tree = renderer.create(<ThemedText>Snapshot test!</ThemedText>).toJSON();
+it(`renders correctly`, async () => {
+  let component: ReactTestRenderer | undefined;
 
-  expect(tree).toMatchSnapshot();
+  await act(async () => {
+    component = renderer.create(<ThemedText>Snapshot test!</ThemedText>);
+  });
+
+  expect(component?.toJSON()).toMatchSnapshot();
 });
