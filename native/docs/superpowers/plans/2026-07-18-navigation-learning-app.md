@@ -48,6 +48,7 @@ describe('normalizeHttpUrl', () => {
     ['https://docs.expo.dev/router/introduction/', 'https://docs.expo.dev/router/introduction/'],
     ['http://example.com/path', 'http://example.com/path'],
     ['  expo.dev  ', 'https://expo.dev/'],
+    ['example.com:8080/path', 'https://example.com:8080/path'],
   ])('normalizes %s', (input, expected) => expect(normalizeHttpUrl(input)).toEqual({ ok: true, url: expected }));
 
   it.each(['', 'ftp://expo.dev', 'https://', 'not a host'])('rejects %s', (input) => {
@@ -58,7 +59,7 @@ describe('normalizeHttpUrl', () => {
 describe('filterBookmarks', () => {
   it('filters unread records', () => expect(filterBookmarks(INITIAL_BOOKMARKS, { unreadOnly: true })).toHaveLength(4));
   it('matches title, URL, notes, and tags case-insensitively', () => {
-    expect(filterBookmarks(INITIAL_BOOKMARKS, { query: 'NAVIGATION' }).map((item) => item.id)).toEqual(['expo-router']);
+    expect(filterBookmarks(INITIAL_BOOKMARKS, { query: 'NAVIGATION' }).map((item) => item.id)).toEqual(['expo-router', 'native-stack']);
   });
   it('matches a tag exactly', () => {
     expect(filterBookmarks(INITIAL_BOOKMARKS, { tag: 'React Native' }).every((item) => item.tags.includes('React Native'))).toBe(true);
@@ -126,7 +127,8 @@ import type { Bookmark, BookmarkFilter, UrlValidationResult } from '@/types/book
 export function normalizeHttpUrl(rawValue: string): UrlValidationResult {
   const value = rawValue.trim();
   if (!value) return { ok: false, message: 'Enter a valid HTTP or HTTPS URL.' };
-  const candidate = /^[a-z][a-z\d+.-]*:/i.test(value) ? value : `https://${value}`;
+  const hasExplicitScheme = /^[a-z][a-z\d+.-]*:(?!\d+(?:[/?#]|$))/i.test(value);
+  const candidate = hasExplicitScheme ? value : `https://${value}`;
   try {
     const url = new URL(candidate);
     if (!['http:', 'https:'].includes(url.protocol) || !url.hostname || !url.hostname.includes('.')) throw new Error('invalid');
