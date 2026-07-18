@@ -25,3 +25,4 @@ yarn-error.log*
 
 # isolated Codex feature worktrees
 /.worktrees/
+/native/.worktrees/
