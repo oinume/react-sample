@@ -3,7 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start",
+    "start": "expo start -p 4001",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
@@ -16,8 +16,6 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
-    "@react-navigation/bottom-tabs": "^7.18.11",
-    "@react-navigation/native": "^7.3.11",
     "expo": "~57.0.7",
     "expo-blur": "~57.0.2",
     "expo-constants": "~57.0.6",
@@ -30,25 +28,26 @@
     "expo-symbols": "~57.0.1",
     "expo-system-ui": "~57.0.1",
     "expo-web-browser": "~57.0.1",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
     "react-native": "0.86.0",
-    "react-native-gesture-handler": "~3.1.0",
-    "react-native-reanimated": "~4.5.2",
-    "react-native-safe-area-context": "5.8.0",
-    "react-native-screens": "~4.26.2",
+    "react-native-gesture-handler": "~2.32.0",
+    "react-native-reanimated": "4.5.0",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "4.25.2",
     "react-native-web": "~0.21.2",
-    "react-native-webview": "14.0.1"
+    "react-native-webview": "13.16.1",
+    "react-native-worklets": "0.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
-    "@types/jest": "^30.0.0",
+    "@types/jest": "29.5.14",
     "@types/react": "~19.2.17",
     "@types/react-test-renderer": "^19.1.0",
-    "jest": "^30.4.2",
+    "jest": "~29.7.0",
     "jest-expo": "~57.0.2",
-    "react-test-renderer": "19.2.7",
-    "typescript": "^7.0.2"
+    "react-test-renderer": "19.2.3",
+    "typescript": "~6.0.3"
   },
   "private": true
 }
