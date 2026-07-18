@@ -27,7 +27,10 @@ jest.mock('@/hooks/useAppTheme', () => {
 });
 
 function Observer() {
-  mockBookmarks = useBookmarks();
+  const bookmarks = useBookmarks();
+  React.useEffect(() => {
+    mockBookmarks = bookmarks;
+  }, [bookmarks]);
   return null;
 }
 

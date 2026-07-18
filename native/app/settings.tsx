@@ -5,7 +5,7 @@ import { RouteStamp } from '@/components/bookmarks/RouteStamp';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { type Appearance, useSettings } from '@/providers/SettingsProvider';
 
-const APPEARANCE_OPTIONS: ReadonlyArray<{ label: string; value: Appearance }> = [
+const APPEARANCE_OPTIONS: readonly { label: string; value: Appearance }[] = [
   { label: 'System', value: 'system' },
   { label: 'Light', value: 'light' },
   { label: 'Dark', value: 'dark' },
