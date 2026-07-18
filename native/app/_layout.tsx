@@ -1,25 +1,52 @@
+import 'react-native-gesture-handler';
+import 'react-native-reanimated';
+
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router/react-navigation';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { type PropsWithChildren, useEffect } from 'react';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useAppTheme } from '@/hooks/useAppTheme';
+import { BookmarkProvider } from '@/providers/BookmarkProvider';
+import { SettingsProvider } from '@/providers/SettingsProvider';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+void SplashScreen.preventAutoHideAsync();
+
+function NavigationTheme({ children }: PropsWithChildren) {
+  const { scheme, colors } = useAppTheme();
+  const baseTheme = scheme === 'dark' ? DarkTheme : DefaultTheme;
+
+  return (
+    <ThemeProvider
+      value={{
+        ...baseTheme,
+        colors: {
+          ...baseTheme.colors,
+          background: colors.canvas,
+          card: colors.paper,
+          text: colors.ink,
+          primary: colors.accent,
+          border: colors.line,
+        },
+      }}
+    >
+      {children}
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+    </ThemeProvider>
+  );
+}
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync();
+      void SplashScreen.hideAsync();
     }
   }, [loaded]);
 
@@ -28,12 +55,44 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <SettingsProvider>
+      <BookmarkProvider>
+        <NavigationTheme>
+          <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
+            <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="tags/[tag]"
+              options={{ title: 'Tag bookmarks' }}
+            />
+            <Stack.Screen name="settings" options={{ title: 'Settings' }} />
+            <Stack.Screen name="browser" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="add-url"
+              options={{
+                presentation: 'formSheet',
+                headerShown: false,
+                sheetAllowedDetents: [0.48, 0.9],
+                sheetInitialDetentIndex: 0,
+                sheetGrabberVisible: true,
+              }}
+            />
+            <Stack.Screen
+              name="add-bookmark"
+              options={{
+                presentation: 'formSheet',
+                headerShown: false,
+                sheetAllowedDetents: [0.72, 1],
+                sheetInitialDetentIndex: 0,
+                sheetGrabberVisible: true,
+              }}
+            />
+            <Stack.Screen
+              name="+not-found"
+              options={{ title: 'Not found' }}
+            />
+          </Stack>
+        </NavigationTheme>
+      </BookmarkProvider>
+    </SettingsProvider>
   );
 }
