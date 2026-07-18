@@ -1,9 +1,10 @@
 import { memo, useCallback, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { RouteStamp } from '@/components/bookmarks/RouteStamp';
 import { useAppTheme } from '@/hooks/useAppTheme';
+import { useSettings } from '@/providers/SettingsProvider';
 import type { Bookmark } from '@/types/bookmark';
 import { getDisplayHost } from '@/utils/bookmarks';
 
@@ -14,9 +15,17 @@ export type BookmarkCardProps = {
 export const BookmarkCard = memo(function BookmarkCard({ bookmark }: BookmarkCardProps) {
   const router = useRouter();
   const { colors } = useAppTheme();
+  const { openLinksInApp } = useSettings();
   const openBookmark = useCallback(() => {
-    router.push({ pathname: '/browser', params: { id: bookmark.id } });
-  }, [bookmark.id, router]);
+    if (openLinksInApp) {
+      router.push({ pathname: '/browser', params: { id: bookmark.id } });
+      return;
+    }
+
+    void Linking.openURL(bookmark.url).catch(() => {
+      Alert.alert('Could not open link', 'Please try opening the URL again.');
+    });
+  }, [bookmark.id, bookmark.url, openLinksInApp, router]);
   const cardStyle = useMemo(
     () => [
       styles.card,

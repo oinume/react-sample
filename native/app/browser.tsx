@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Linking,
+  Platform,
   Pressable,
   ScrollView,
   Share,
@@ -89,12 +91,75 @@ export default function BrowserScreen() {
     );
   }
 
+  if (Platform.OS === 'web') {
+    return <WebBrowserFallback bookmark={bookmark} />;
+  }
+
   return <BrowserView key={`${bookmark.id}:${bookmark.url}`} bookmark={bookmark} />;
 }
 
 type BrowserViewProps = {
   bookmark: Bookmark;
 };
+
+function WebBrowserFallback({ bookmark }: BrowserViewProps) {
+  const router = useRouter();
+  const { colors } = useAppTheme();
+
+  function closeBrowser() {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  }
+
+  function openInBrowser() {
+    void Linking.openURL(bookmark.url).catch(() => {
+      Alert.alert('Could not open link', 'Please try opening the URL again.');
+    });
+  }
+
+  return (
+    <SafeAreaView
+      edges={['top', 'bottom']}
+      style={[styles.screen, { backgroundColor: colors.canvas }]}>
+      <View style={[styles.topBar, { borderBottomColor: colors.line }]}>
+        <Pressable
+          accessibilityLabel="Close browser"
+          accessibilityRole="button"
+          onPress={closeBrowser}
+          style={[styles.closeButton, { backgroundColor: colors.paper, borderColor: colors.line }]}>
+          <Text style={[styles.closeLabel, { color: colors.accent }]}>Close</Text>
+        </Pressable>
+        <View style={styles.location}>
+          <Text numberOfLines={1} style={[styles.host, { color: colors.ink }]}>
+            {getDisplayHost(bookmark.url)}
+          </Text>
+          <RouteStamp>STACK → WEB HISTORY</RouteStamp>
+        </View>
+      </View>
+      <View style={styles.webFallback}>
+        <Text accessibilityRole="header" style={[styles.webFallbackTitle, { color: colors.ink }]}>
+          Embedded browser unavailable on web
+        </Text>
+        <Text numberOfLines={2} style={[styles.webFallbackUrl, { color: colors.muted }]}>
+          {bookmark.url}
+        </Text>
+        <Text style={[styles.webFallbackMessage, { color: colors.muted }]}>
+          Open this bookmark in your browser to continue.
+        </Text>
+        <Pressable
+          accessibilityLabel="Open in browser"
+          accessibilityRole="button"
+          onPress={openInBrowser}
+          style={[styles.openExternalButton, { backgroundColor: colors.accent }]}>
+          <Text style={[styles.openExternalLabel, { color: colors.paper }]}>Open in browser</Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
+  );
+}
 
 function BrowserView({ bookmark }: BrowserViewProps) {
   const router = useRouter();
@@ -314,6 +379,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   retryLabel: { fontSize: 15, fontWeight: '800' },
+  webFallback: {
+    alignItems: 'center',
+    flex: 1,
+    gap: 12,
+    justifyContent: 'center',
+    padding: 24,
+  },
+  webFallbackTitle: { fontSize: 20, fontWeight: '800', textAlign: 'center' },
+  webFallbackUrl: { fontSize: 13, lineHeight: 18, textAlign: 'center' },
+  webFallbackMessage: { fontSize: 15, lineHeight: 22, textAlign: 'center' },
+  openExternalButton: {
+    alignItems: 'center',
+    borderCurve: 'continuous',
+    borderRadius: 14,
+    justifyContent: 'center',
+    minHeight: 48,
+    paddingHorizontal: 18,
+  },
+  openExternalLabel: { fontSize: 15, fontWeight: '800' },
   bottomBar: { borderTopWidth: 1 },
   toolbar: { gap: 8, paddingHorizontal: 12, paddingVertical: 8 },
   toolbarButton: {

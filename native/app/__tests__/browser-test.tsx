@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, jest } from '@jest/globals';
 import * as React from 'react';
-import { Alert, Share, Text } from 'react-native';
+import { Alert, Linking, Platform, Share, Text } from 'react-native';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 
 import BrowserScreen from '@/app/browser';
@@ -16,6 +16,7 @@ const mockWebGoForward = jest.fn();
 const mockWebReload = jest.fn();
 const mockShare = jest.spyOn(Share, 'share');
 const mockAlert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+const mockOpenURL = jest.spyOn(Linking, 'openURL');
 let mockParams: { id?: string | string[] } = { id: 'expo-router' };
 let mockWebViewInstanceCount = 0;
 
@@ -67,6 +68,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockCanGoBack.mockReturnValue(true);
   mockShare.mockResolvedValue({ action: Share.sharedAction });
+  mockOpenURL.mockResolvedValue(undefined);
   mockWebViewInstanceCount = 0;
 });
 
@@ -300,5 +302,53 @@ it('recovers from an unknown bookmark without mounting a WebView', () => {
     act(() => {
       tree?.unmount();
     });
+  }
+});
+
+it('uses an external browser fallback on web and handles opening failures', async () => {
+  const platform = jest.replaceProperty(Platform, 'OS', 'web');
+  mockCanGoBack.mockReturnValue(false);
+  let tree: ReactTestRenderer | undefined;
+
+  try {
+    await act(async () => {
+      tree = create(screen());
+    });
+
+    expect(tree!.root.findAllByType('WebView' as never)).toHaveLength(0);
+    expect(tree!.root.findAllByProps({ accessibilityLabel: 'Page loading' })).toHaveLength(0);
+    expect(tree!.root.findByProps({ children: 'Embedded browser unavailable on web' })).toBeTruthy();
+    expect(
+      tree!.root.findByProps({ children: 'https://docs.expo.dev/router/introduction/' }),
+    ).toBeTruthy();
+    expect(tree!.root.findByProps({ children: 'docs.expo.dev' })).toBeTruthy();
+    expect(tree!.root.findByProps({ children: 'STACK → WEB HISTORY' })).toBeTruthy();
+
+    await act(async () => {
+      tree!.root.findByProps({ accessibilityLabel: 'Open in browser' }).props.onPress();
+      await Promise.resolve();
+    });
+    expect(mockOpenURL).toHaveBeenCalledWith('https://docs.expo.dev/router/introduction/');
+
+    mockOpenURL.mockRejectedValueOnce(new Error('Browser unavailable'));
+    await act(async () => {
+      tree!.root.findByProps({ accessibilityLabel: 'Open in browser' }).props.onPress();
+      await Promise.resolve();
+    });
+    expect(mockAlert).toHaveBeenCalledWith(
+      'Could not open link',
+      'Please try opening the URL again.',
+    );
+
+    act(() => {
+      tree!.root.findByProps({ accessibilityLabel: 'Close browser' }).props.onPress();
+    });
+    expect(mockBack).not.toHaveBeenCalled();
+    expect(mockReplace).toHaveBeenCalledWith('/');
+  } finally {
+    act(() => {
+      tree?.unmount();
+    });
+    platform.restore();
   }
 });
