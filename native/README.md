@@ -1,50 +1,44 @@
-# Welcome to your Expo app 👋
+# Navigation Learning Bookmark App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+An Expo Router learning app that organizes sample bookmarks while demonstrating drawer, stack, form-sheet, and WebView navigation patterns.
 
-## Get started
+## Prerequisites
 
-1. Install dependencies
+- A current Node.js LTS release and npm
+- Expo-supported iOS or Android tooling for native verification
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Run locally
 
 ```bash
-npm run reset-project
+npm install
+npm start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Quality checks
 
-## Learn more
+```bash
+npx jest --runInBand
+npm run lint
+npx tsc --noEmit
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## Routes and transitions
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+| Experience | Route | Navigation behavior |
+| --- | --- | --- |
+| Bookmark home | `/` | Front drawer with searchable All, Unread, React Native, and Navigation filters |
+| Tag bookmarks | `/tags/[tag]` | Stack push from a nested drawer tag |
+| Settings | `/settings` | Stack push from the drawer |
+| Bookmark browser | `/browser?id=…` | Stack destination containing a WebView with its own back/forward history |
+| Add URL | `/add-url` | Native form sheet that validates the first bookmark URL step |
+| Add or edit bookmark | `/add-bookmark` | Native form sheet for bookmark fields and edits |
+| Unknown route | Any unmatched path (`app/+not-found.tsx`) | Stack fallback with a replace action back to bookmarks |
 
-## Join the community
+## Data scope
 
-Join our community of developers creating universal apps.
+Bookmark and settings data intentionally live only in React state for the current app session. This learning sample has no authentication, backend, database, or persistence layer.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Manual native verification
+
+- Open both add flows on iOS or Android and confirm their native form-sheet presentation, detents, keyboard behavior, save actions, and close fallback.
+- Open a bookmark in the browser screen and confirm the WebView loads, its back/forward controls follow WebView history, and closing returns through the app stack.
